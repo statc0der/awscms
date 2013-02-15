@@ -1,0 +1,13 @@
+{
+  "name": "awscms",
+  "version": "0.0.0",
+  "dependencies": {
+    "prelude-ls": "~0.6.0",
+    "sync": "~0.2.2",
+    "handlebars": "~1.0.8",
+    "aws2js": "~0.8.1"
+  },
+  "devDependencies": {
+    "express": "~3.1.0"
+  }
+}
