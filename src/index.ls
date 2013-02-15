@@ -14,7 +14,7 @@ sync-cb = (label,err,res)-->
 	console.error label, that.stack if err?
 	console.log label, that if res?
 
-class Awscms
+module.exports = class Awscms
 	var s3
 	@handlers = [Template,Partial,Data]
 	@init-s3 = (new-s3)->
