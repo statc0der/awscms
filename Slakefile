@@ -15,3 +15,20 @@ task \build "build lib/ from src/" ->
 		|> (`fs.read-file-sync` \utf8)
 		|> LiveScript.compile
 		|> slobber path,_
+
+task \run ->
+	http    = require \http
+	express = require \express
+	Awscms  = require \./lib
+
+	port    = process.env.PORT ? 3000
+	app     = express!
+	
+	app.use ...Awscms.middleware {
+		prefix: '/'
+		...(JSON.parse fs.read-file-sync 'config.json' \utf8)
+	}
+	app.use (q,s,n)->s.send "404"
+
+	server = http.create-server app
+	server.listen port, ->console.log "listening on #port"
