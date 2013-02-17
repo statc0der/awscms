@@ -12,6 +12,9 @@ class exports.Template
 	@init-s3 = (s3 :=)
 	@handles = (is \.htm) . extname
 	
+	@resolve = (path)->
+		@@files[path] ? @@files["#path/index"]
+	
 	last-etag: null
 	compiled: null
 	load: async ->
