@@ -43,7 +43,6 @@ class exports.Template
 
 	compile: (src)->
 		# compile & cache it
-		console.log "compile #{@path}"
 		@compiled = handlebars.compile src
 
 	render: async (data)->

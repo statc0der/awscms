@@ -14,11 +14,6 @@ require! {
 
 tap = (fn,a)--> fn a; a
 and-now = tap (do)
-
-sync-cb = (label,err,res)-->
-	console.error label, that.stack if err?
-	console.log label, that if res?
-
 module.exports = class Awscms
 	var s3
 	@handlers = [Template,Partial,Data]
@@ -39,9 +34,7 @@ module.exports = class Awscms
 		s3.set-bucket bucket
 		
 		set-interval do
-			and-now ~> Sync do
-				:fiber ~>@load-templates!
-				sync-cb \load-templates
+			and-now ~> Sync @~load-templates
 			refresh-interval
 			
 	refresh: async ->
