@@ -9,6 +9,7 @@ require! {
 	"./template".Template
 	"./partial".Partial
 	"./data".Data
+	"./globaldata".GlobalData
 	"prelude-ls".find
 }
 
@@ -16,7 +17,7 @@ tap = (fn,a)--> fn a; a
 and-now = tap (do)
 module.exports = class Awscms
 	var s3
-	@handlers = [Template,Partial,Data]
+	@handlers = [Template,Partial,Data,GlobalData]
 	@init-s3 = (new-s3)->
 		# Template needs to access our S3
 		s3 := new-s3
@@ -57,6 +58,7 @@ module.exports = class Awscms
 
 				if (file = (Template.resolve remote-path))?
 					if @external? then that req,res else {} # any external data?
+					|> (import GlobalData.collapse!)
 					|> file.render
 					|> res.send
 					return true # notify sync's callback that we were able to render (avoids sending headers twice)
