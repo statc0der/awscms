@@ -55,18 +55,3 @@ module.exports = class Awscms
 
 	@middleware = ({prefix}:conf)->
 		[prefix, new Awscms conf .~middleware]
-
-if module is require.main
-	require! [http,express]
-	port = process.env.PORT ? 3000
-	app = express!
-	
-	app.use ...Awscms.middleware do
-		prefix: '/'
-		access-key-id: \access
-		secret-access-key: \secret
-		bucket: \bucket
-	app.use (q,s,n)->s.send "404"
-
-	server = http.create-server app
-	server.listen port, ->console.log "listening on #port"
