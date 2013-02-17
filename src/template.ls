@@ -51,7 +51,7 @@ class exports.Template
 			throw that
 		else if @load()?
 			# we have a cached template
-			blob = (require "./data" .Data.resolve @unext)?.render! # any data blobs for us?
+			blob = (require "./data" .Data.resolve @unext)?.render! ? {} # any data blobs for us?
 			that blob import data
 		else
 			# if we're here something's rotten but you never know
