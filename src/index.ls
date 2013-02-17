@@ -22,7 +22,7 @@ module.exports = class Awscms
 		s3 := new-s3
 		Template.init-s3 new-s3
 
-	({
+	({ # Awscms' constructor
 		access-key-id
 		secret-access-key
 		bucket
@@ -56,7 +56,7 @@ module.exports = class Awscms
 				remote-path = req.url - //^#{@prefix}// # strip off the prefix
 
 				if (file = (Template.resolve remote-path))?
-					if @external? then that req,res else {}
+					if @external? then that req,res else {} # any external data?
 					|> file.render
 					|> res.send
 					return true # notify sync's callback that we were able to render (avoids sending headers twice)
