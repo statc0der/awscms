@@ -27,7 +27,14 @@ module.exports = class Awscms
 		s3 := new-s3
 		Template.init-s3 new-s3
 
-	({access-key-id,secret-access-key,bucket,@prefix,refresh-interval ? 1000ms * 60s * 5m})->
+	({
+		access-key-id
+		secret-access-key
+		bucket
+		@prefix
+		@external
+		refresh-interval ? 1000ms * 60s * 5m
+	})->
 		@@init-s3 aws2js.load \s3 access-key-id,secret-access-key
 		s3.set-bucket bucket
 		
@@ -57,6 +64,7 @@ module.exports = class Awscms
 
 				if (Template.resolve remote-path)?
 					(Data.resolve remote-path)?.render! ? {} # any json for us?
+					|> if @external? then (import that req,res) else id
 					|> that.render
 					|> res.send
 					return true # notify sync's callback that we were able to render (avoids sending headers twice)
