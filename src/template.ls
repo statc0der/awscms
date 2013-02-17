@@ -15,12 +15,12 @@ class exports.Template
 	@resolve = (path)->
 		@files[path] ? @files["#path/index"]
 		
-		
 	last-etag: null
 	compiled: null
 	current-refresh: null
 	
 	load: async ->
+		# if there is an S3 GET currently in progress, block on it
 		that.yield! if @current-refresh?
 		return @compiled
 	
@@ -43,7 +43,6 @@ class exports.Template
 
 	compile: (src)->
 		# compile & cache it
-		console.log "compile #{@path}"
 		@compiled = handlebars.compile src
 
 	render: async (data)->
