@@ -1,4 +1,3 @@
-{spawn,exec} = require \child_process
 LiveScript = require \LiveScript
 {relative,resolve} = require \path
 fs = require \fs
