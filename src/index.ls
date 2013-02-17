@@ -8,6 +8,7 @@ require! {
 	"./template".Template
 	"./partial".Partial
 	"./data".Data
+	"prelude-ls".find
 }
 
 sync-cb = (label,err,res)-->
