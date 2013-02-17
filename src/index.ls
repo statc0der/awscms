@@ -5,11 +5,15 @@ require! {
 	path.extname
 	"./magic".sync
 	"./magic".async
+	"./magic".future
 	"./template".Template
 	"./partial".Partial
 	"./data".Data
 	"prelude-ls".find
 }
+
+tap = (fn,a)--> fn a; a
+and-now = tap (do)
 
 sync-cb = (label,err,res)-->
 	console.error label, that.stack if err?
@@ -23,19 +27,27 @@ module.exports = class Awscms
 		s3 := new-s3
 		Template.init-s3 new-s3
 
-	({access-key-id,secret-access-key,bucket,@prefix})->
+	({access-key-id,secret-access-key,bucket,@prefix,refresh-interval ? 1000ms * 60s * 5m})->
 		@@init-s3 aws2js.load \s3 access-key-id,secret-access-key
 		s3.set-bucket bucket
-		Sync do
-			:fiber ~> @load-templates!
-			sync-cb \load-templates
+		
+		set-interval do
+			and-now ~> Sync do
+				:fiber ~>@load-templates!
+				sync-cb \load-templates
+			refresh-interval
+			
+	refresh: async ->
+		for handler in @@handlers => do sync handler~refresh
 
 	load-templates: async ->
 		# GET the bucket root for a list of all its files
 		for {Key} in [] ++ ((sync s3~get) '/' \xml .Contents)
 			# instantiate a handler for each file in the bucket if we can
-			if find (.handles Key), @@handlers
-				new that Key
+			if handler = find (.handles Key), @@handlers
+				if (file = handler.files[Key - //#{extname Key}$//])?
+					file.current-refresh = do (future file~refresh) unless file.current-refresh?
+				else new handler Key
 			else console.error "No handler for #Key"
 
 	middleware: (req,res,next)-> Sync do
@@ -44,7 +56,7 @@ module.exports = class Awscms
 				remote-path = req.url - //^#{@prefix}// # strip off the prefix
 
 				if (Template.resolve remote-path)?
-					(Data.resolve remote-path)?data ? {} # any json for us?
+					(Data.resolve remote-path)?.render! ? {} # any json for us?
 					|> that.render
 					|> res.send
 					return true # notify sync's callback that we were able to render (avoids sending headers twice)

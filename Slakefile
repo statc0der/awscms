@@ -25,6 +25,7 @@ task \run ->
 	
 	app.use ...Awscms.middleware {
 		prefix: '/'
+		refresh-interval: 60s * 1000ms
 		...(JSON.parse fs.read-file-sync 'config.json' \utf8)
 	}
 	app.use (q,s,n)->s.send "404"
