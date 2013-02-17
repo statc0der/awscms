@@ -13,7 +13,7 @@ class exports.Template
 	@handles = (is \.htm) . extname
 	
 	@resolve = (path)->
-		@files[path] ? @files["#path/index"]
+		@files[path] ? @files[if path then "#path/index" else \index]
 		
 	last-etag: null
 	compiled: null
