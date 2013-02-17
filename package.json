@@ -1,6 +1,6 @@
 {
   "name": "awscms",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Matt Brennan <matt.brennan@import.io>",
   "dependencies": {
     "prelude-ls": "~0.6.0",
@@ -9,7 +9,8 @@
     "aws2js": "~0.8.1"
   },
   "devDependencies": {
-    "express": "~3.1.0"
+    "express": "~3.1.0",
+    "LiveScript": "~1.1.1"
   },
   "main": "lib",
   "repository": {

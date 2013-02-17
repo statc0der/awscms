@@ -5,15 +5,15 @@ require! {
 	path.extname
 	"./magic".sync
 	"./magic".async
+	"./magic".future
 	"./template".Template
 	"./partial".Partial
 	"./data".Data
+	"prelude-ls".find
 }
 
-sync-cb = (label,err,res)-->
-	console.error label, that.stack if err?
-	console.log label, that if res?
-
+tap = (fn,a)--> fn a; a
+and-now = tap (do)
 module.exports = class Awscms
 	var s3
 	@handlers = [Template,Partial,Data]
@@ -22,19 +22,32 @@ module.exports = class Awscms
 		s3 := new-s3
 		Template.init-s3 new-s3
 
-	({access-key-id,secret-access-key,bucket,@prefix})->
+	({ # Awscms' constructor
+		access-key-id
+		secret-access-key
+		bucket
+		@prefix
+		@external
+		refresh-interval ? 1000ms * 60s * 5m
+	})->
 		@@init-s3 aws2js.load \s3 access-key-id,secret-access-key
 		s3.set-bucket bucket
-		Sync do
-			:fiber ~> @load-templates!
-			sync-cb \load-templates
+		
+		set-interval do
+			and-now ~> Sync @~load-templates
+			refresh-interval
+			
+	refresh: async ->
+		for handler in @@handlers => do sync handler~refresh
 
 	load-templates: async ->
 		# GET the bucket root for a list of all its files
 		for {Key} in [] ++ ((sync s3~get) '/' \xml .Contents)
 			# instantiate a handler for each file in the bucket if we can
-			if find (.handles Key), @@handlers
-				new that Key
+			if handler = find (.handles Key), @@handlers
+				if (file = handler.files[Key - //#{extname Key}$//])?
+					file.current-refresh = do (future file~refresh) unless file.current-refresh?
+				else new handler Key
 			else console.error "No handler for #Key"
 
 	middleware: (req,res,next)-> Sync do
@@ -42,9 +55,9 @@ module.exports = class Awscms
 			if //^#{@prefix}// == req.path
 				remote-path = req.url - //^#{@prefix}// # strip off the prefix
 
-				if Template.files[remote-path]?
-					Data.files[remote-path]?data ? {} # any json for us?
-					|> that.render
+				if (file = (Template.resolve remote-path))?
+					if @external? then that req,res else {} # any external data?
+					|> file.render
 					|> res.send
 					return true # notify sync's callback that we were able to render (avoids sending headers twice)
 					
@@ -54,18 +67,3 @@ module.exports = class Awscms
 
 	@middleware = ({prefix}:conf)->
 		[prefix, new Awscms conf .~middleware]
-
-if module is require.main
-	require! [http,express]
-	port = process.env.PORT ? 3000
-	app = express!
-	
-	app.use ...Awscms.middleware do
-		prefix: '/'
-		access-key-id: \access
-		secret-access-key: \secret
-		bucket: \bucket
-	app.use (q,s,n)->s.send "404"
-
-	server = http.create-server app
-	server.listen port, ->console.log "listening on #port"
