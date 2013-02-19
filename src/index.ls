@@ -40,7 +40,7 @@ module.exports = class Awscms
 		s3.set-bucket bucket
 		
 		set-interval do
-			and-now ~> Sync @~load-templates
+			and-now ~> Sync @~load-templates, -> if it? then console.error it
 			refresh-interval
 			
 	refresh: async ->
