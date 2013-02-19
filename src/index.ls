@@ -1,6 +1,7 @@
 require! {
 	aws2js
 	handlebars
+	tunnel
 	Sync:sync
 	path.extname
 	"./magic".sync
@@ -29,13 +30,17 @@ module.exports = class Awscms
 		bucket
 		@prefix
 		@external
+		proxy
+		http-options ? {}
 		refresh-interval ? 1000ms * 60s * 5m
 	})->
-		@@init-s3 aws2js.load \s3 access-key-id,secret-access-key
+		if proxy? then http-options import agent:tunnel.https-over-http {proxy}
+
+		@@init-s3 aws2js.load \s3 access-key-id, secret-access-key,null,http-options
 		s3.set-bucket bucket
 		
 		set-interval do
-			and-now ~> Sync @~load-templates
+			and-now ~> Sync @~load-templates, -> if it? then console.error it
 			refresh-interval
 			
 	refresh: async ->
