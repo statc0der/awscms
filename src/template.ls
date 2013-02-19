@@ -29,8 +29,7 @@ class exports.Template
 			@error = null
 			# all we need is the etag
 			headers = (sync s3~head) @path
- diff
- 
+
 			if headers.etag isnt @last-etag
 				# it's fresh on s3
 				@last-etag = headers.etag
