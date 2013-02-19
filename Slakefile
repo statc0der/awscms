@@ -25,7 +25,7 @@ task \run ->
 	
 	app.use ...Awscms.middleware {
 		prefix: '/'
-		refresh-interval: 60s * 1000ms
+		refresh-interval: 5s * 1000ms
 		external: -> test:"hello"
 		...(JSON.parse fs.read-file-sync 'config.json' \utf8)
 	}
