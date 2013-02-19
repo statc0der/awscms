@@ -34,7 +34,7 @@ module.exports = class Awscms
 		http-options ? {}
 		refresh-interval ? 1000ms * 60s * 5m
 	})->
-		if proxy? then http-options import agent:tunnel.http-over-http that
+		if proxy? then http-options import agent:tunnel.https-over-http {proxy}
 
 		@@init-s3 aws2js.load \s3 access-key-id, secret-access-key,null,http-options
 		s3.set-bucket bucket
