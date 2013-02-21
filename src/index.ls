@@ -59,7 +59,7 @@ module.exports = class Awscms
 	middleware: (req,res,next)-> Sync do
 		:fiber ~>
 			if //^#{@prefix}// == req.path
-				remote-path = req.url - //^#{@prefix}// # strip off the prefix
+				remote-path = req.path - //^#{@prefix}// # strip off the prefix
 
 				if (file = (Template.resolve remote-path))?
 					if @external? then that req,res else {} # any external data?
