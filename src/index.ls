@@ -62,8 +62,9 @@ module.exports = class Awscms
 				remote-path = req.url - //^#{@prefix}// # strip off the prefix
 
 				if (file = (Template.resolve remote-path))?
-					if @external? then that req,res else {} # any external data?
-					|> (import GlobalData.collapse!)
+					ex = if @external? then that req,res else {} # any external data?
+					GlobalData.collapse!
+					|> (import ex)
 					|> file.render
 					|> res.send
 					return true # notify sync's callback that we were able to render (avoids sending headers twice)
