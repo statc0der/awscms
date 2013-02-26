@@ -1,3 +1,4 @@
+global import require \prelude-ls
 LiveScript = require \LiveScript
 {relative,resolve} = require \path
 fs = require \fs
@@ -34,3 +35,23 @@ task \run ->
 
 	server = http.create-server app
 	server.listen port, ->console.log "listening on #port"
+	
+parse-version = (ver)->
+	[major,minor,release] = map parse-int, ver.split \.
+	{major,minor,release}
+
+format-version = (ver)->
+	join \. ver[\major \minor \release]
+
+munge-file = (file,fn)-->
+	fs.read-file-sync file, \utf8
+	|> fn
+	|> fs.write-file-sync file, _
+
+munge-package = (fn)-> munge-file \package.json JSON.parse>>fn>>(JSON.stringify _,null,2)
+
+munge-version = (fn)-> munge-package (import version: format-version fn parse-version it.version)
+
+task \bump-release ->munge-version (import release: it.release + 1)
+task \bump-minor   ->munge-version (import minor:   it.minor   + 1, release: 0)
+task \bump-major   ->munge-version (import major:   it.major   + 1, minor: 0 release: 0)
