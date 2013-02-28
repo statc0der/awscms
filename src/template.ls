@@ -10,7 +10,7 @@ class exports.Template
 	var s3
 	@files = []
 	@init-s3 = (s3 :=)
-	@handles = (is \.htm) . extname
+	@handles = (in [\.htm \.html]) . extname
 	
 	@resolve = (path)->
 		@files[path] ? @files[if path then "#path/index" else \index]
@@ -21,7 +21,9 @@ class exports.Template
 	
 	load: async ->
 		# if there is an S3 GET currently in progress, block on it
-		that.yield! if @current-refresh?
+		if @current-refresh?
+			that.yield!
+			@current-refresh = null
 		return @compiled
 	
 	refresh: async ->
@@ -36,8 +38,6 @@ class exports.Template
 				
 				{buffer} = (sync s3~get) @path,\buffer
 				@compile buffer.to-string \utf8
-
-			@current-refresh = null
 
 		catch @error
 			# let load know we couldn't
