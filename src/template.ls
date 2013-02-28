@@ -10,7 +10,7 @@ class exports.Template
 	var s3
 	@files = []
 	@init-s3 = (s3 :=)
-	@handles = (is \.htm) . extname
+	@handles = (in [\.htm \.html]) . extname
 	
 	@resolve = (path)->
 		@files[path] ? @files[if path then "#path/index" else \index]
