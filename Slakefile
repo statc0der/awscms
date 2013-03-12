@@ -34,6 +34,11 @@ task \build "build lib/ from src/" ->
 
 task \clean "clean lib/" shell "rm -rf lib"
 
+task \publish ->
+	invoke \clean
+	invoke \build
+	do shell "npm publish"
+
 task \run ->
 	http    = require \http
 	express = require \express
