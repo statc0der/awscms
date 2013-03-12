@@ -7,7 +7,7 @@ fs = require \fs
 
 shell = (line)->
 	[cmd,...args] = words line
-	(out)->
+	(out ? id)->
 		console.log line
 		spawn cmd,args,stdio:\inherit .on \close out
 
