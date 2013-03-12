@@ -38,11 +38,17 @@ module.exports = class Awscms
 
 		@@init-s3 aws2js.load \s3 access-key-id, secret-access-key,null,http-options
 		s3.set-bucket bucket
-		
-		set-interval do
-			and-now ~> Sync @~load-templates, -> if it? then console.error it
-			refresh-interval
-			
+
+		Sync do
+			:fiber ~>
+				for ever
+					@load-templates!
+					Sync.sleep refresh-interval
+			:handler ->
+				console.error it
+				throw it if it.errno?
+
+
 	refresh: async ->
 		for handler in @@handlers => do sync handler~refresh
 
@@ -54,7 +60,7 @@ module.exports = class Awscms
 				if (file = handler.files[Key - //#{extname Key}$//])?
 					file.current-refresh = do (future file~refresh) unless file.current-refresh?
 				else new handler Key
-			else console.error "No handler for #Key"
+			else console.warn "No handler for #Key"
 
 	middleware: (req,res,next)-> Sync do
 		:fiber ~>
