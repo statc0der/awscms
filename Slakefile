@@ -7,9 +7,9 @@ fs = require \fs
 
 shell = (line)->
 	[cmd,...args] = words line
-	->
+	(out)->
 		console.log line
-		spawn cmd,args,stdio:\inherit
+		spawn cmd,args,stdio:\inherit .on \close out
 
 slobber = (path,code)->
 	spit path, code
@@ -35,7 +35,7 @@ task \build "build lib/ from src/" ->
 task \clean "clean lib/" shell "rm -rf lib"
 
 task \publish ->
-	invoke \clean
+	<- (shell "rm -rf lib")
 	invoke \build
 	do shell "npm publish"
 
