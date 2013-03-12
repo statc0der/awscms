@@ -1,6 +1,6 @@
 require! {
 	path.extname
-	"./magic".async
+	"../magic".async
 	"./data".Data
 	"prelude-ls".map
 	"prelude-ls".fold

@@ -1,6 +1,6 @@
 require! {
 	path.extname
-	"./handler".Handler
+	"../handler".Handler
 }
 
 class exports.Data extends Handler

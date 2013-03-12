@@ -1,7 +1,7 @@
 require! {
 	handlebars
 	path.extname
-	"./magic".async
+	"../magic".async
 	"./template".Template
 }
 

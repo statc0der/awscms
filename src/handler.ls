@@ -1,9 +1,9 @@
 require! {
 	\require-folder
 	path.extname
-	"../magic".sync
-	"../magic".async
-	"../magic".future
+	"./magic".sync
+	"./magic".async
+	"./magic".future
 }
 
 abstract = (...methods)->

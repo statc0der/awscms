@@ -17,7 +17,7 @@ module.exports = class Awscms
 	@init-s3 = (new-s3)->
 		# Template needs to access our S3
 		s3 := new-s3
-		Template.init-s3 new-s3
+		Handler.init-s3 new-s3
 
 	({ # Awscms' constructor
 		access-key-id
