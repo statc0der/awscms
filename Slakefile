@@ -1,20 +1,38 @@
 global import require \prelude-ls
 LiveScript = require \LiveScript
-{relative,resolve} = require \path
+{relative,resolve,dirname} = require \path
+mkdirp = require \mkdirp
 fs = require \fs
+{spawn} = require \child_process
+
+shell = (line)->
+	[cmd,...args] = words line
+	->
+		console.log line
+		spawn cmd,args,stdio:\inherit
 
 slobber = (path,code)->
 	spit path, code
 	say "* #path"
 
+build-dir = (folder)->
+	for file in dir folder
+		full = folder `resolve` file
+
+		switch
+		| fs.stat-sync full .is-directory! => build-dir full
+		| file == /\.ls$/ =>
+			mkdirp.sync \lib `resolve` (\src `relative` full)
+			path = \lib `resolve` (\src `relative` full) - /\.ls$/ + '.js'
+			
+			fs.read-file-sync full, \utf8
+			|> LiveScript.compile
+			|> slobber path,_
+
 task \build "build lib/ from src/" ->
-	for file in dir \src when file == /\.ls$/
-		path = \lib `resolve` file - /\.ls$/ + '.js'
-		
-		\src `resolve` file
-		|> (`fs.read-file-sync` \utf8)
-		|> LiveScript.compile
-		|> slobber path,_
+	build-dir \src
+
+task \clean "clean lib/" shell "rm -rf lib"
 
 task \run ->
 	http    = require \http
