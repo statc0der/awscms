@@ -5,6 +5,12 @@ mkdirp = require \mkdirp
 fs = require \fs
 {spawn} = require \child_process
 
+shell = (line)->
+	[cmd,...args] = words line
+	->
+		console.log line
+		spawn cmd,args,stdio:\inherit
+
 slobber = (path,code)->
 	spit path, code
 	say "* #path"
@@ -25,6 +31,8 @@ build-dir = (folder)->
 
 task \build "build lib/ from src/" ->
 	build-dir \src
+
+task \clean "clean lib/" shell "rm -rf lib"
 
 task \run ->
 	http    = require \http
