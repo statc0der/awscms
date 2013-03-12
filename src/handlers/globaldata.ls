@@ -10,6 +10,7 @@ require! {
 class exports.GlobalData extends Data
 	@files = []
 	@handles = (is \.gjson) . extname
+	@provides \globaldata
 
 	@collapse = ->
 		fold (import), {}, [f.output! for _,f of @files]

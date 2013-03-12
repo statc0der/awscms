@@ -1,19 +1,29 @@
 require! {
-	handlebars
+	\require-folder
 	path.extname
-	"./magic".sync
-	"./magic".async
-	"./magic".future
+	"../magic".sync
+	"../magic".async
+	"../magic".future
 }
 
-class exports.Template
-	var s3
-	@files = []
+abstract = (...methods)->
+	{[m,->throw new TypeError "#m is abstract"] for m in methods}
+
+class exports.Handler implements abstract \compile \render
+	import abstract \handles
+
+	var s3 # private static
 	@init-s3 = (s3 :=)
-	@handles = (in [\.htm \.html]) . extname
 
 	@resolve = (path)->
 		@files[path] ? @files[if path then "#path/index" else \index]
+
+	@roles = {}
+	@provides = (role)->
+		@roles[role] = this
+
+	@subclasses = []
+	@extended = @subclasses~push
 
 	last-etag: null
 	compiled: null
@@ -43,17 +53,6 @@ class exports.Template
 			# let load know we couldn't
 			return null
 
-	compile: (src)->
-		# compile & cache it
-		@compiled = handlebars.compile src
-
-	render: (template,data)->
-		# any data blobs for us?
-		blob = (require "./data" .Data.resolve @unext)?.output! ? {}
-		if template not instanceof Function
-			console.log [\RSNT template]
-		template ^^blob import data
-
 	output: async (data)->
 		if @load()?
 			# we have a cached template
@@ -69,6 +68,4 @@ class exports.Template
 		# load this template IN THE FUTURE!
 		do future @~refresh
 
-handlebars.register-helper \extends (parent,options)->
-	# render a parent template with the child template as the {{{body}}}
-	Template.files[parent.replace '.' '/'].output {} import this import body:options.fn this
+require-folder \handlers

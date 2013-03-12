@@ -1,10 +1,9 @@
 require! {
 	path.extname
-	"./magic".async
-	"./template".Template
+	"./handler".Handler
 }
 
-class exports.Data extends Template
+class exports.Data extends Handler
 	@files = []
 	@handles = (is \.json) . extname
 
