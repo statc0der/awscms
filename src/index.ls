@@ -40,7 +40,7 @@ module.exports = class Awscms
 		s3.set-bucket bucket
 
 		Sync do
-			:fiber ~>
+			:fiber !~>
 				for ever
 					@load-templates!
 					Sync.sleep refresh-interval
