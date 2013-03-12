@@ -7,7 +7,8 @@
     "sync": "~0.2.2",
     "handlebars": "~1.0.8",
     "aws2js": "~0.8.1",
-    "tunnel": "0.0.2"
+    "tunnel": "0.0.2",
+    "require-folder": "0.0.3"
   },
   "devDependencies": {
     "express": "~3.1.0",
