@@ -12,6 +12,6 @@ class exports.Partial extends Template
 	compile: (src)->
 		handlebars.register-partial (@unext.replace '/' '.') ,handlebars.compile src
 
-	render: async (data)->
+	output: async (data)->
 		# this *should* never get called
 		throw new TypeError "Partial template #{@path} cannot be directly rendered."

@@ -1,31 +1,41 @@
 require! {
-	handlebars
+	\require-folder
 	path.extname
-	"./magic".sync
-	"./magic".async
-	"./magic".future
+	"../magic".sync
+	"../magic".async
+	"../magic".future
 }
 
-class exports.Template
-	var s3
-	@files = []
+abstract = (...methods)->
+	{[m,->throw new TypeError "#m is abstract"] for m in methods}
+
+class exports.Handler implements abstract \compile \render
+	import abstract \handles
+
+	var s3 # private static
 	@init-s3 = (s3 :=)
-	@handles = (in [\.htm \.html]) . extname
-	
+
 	@resolve = (path)->
 		@files[path] ? @files[if path then "#path/index" else \index]
-		
+
+	@roles = {}
+	@provides = (role)->
+		@roles[role] = this
+
+	@subclasses = []
+	@extended = @subclasses~push
+
 	last-etag: null
 	compiled: null
 	current-refresh: null
-	
+
 	load: async ->
 		# if there is an S3 GET currently in progress, block on it
 		if @current-refresh?
 			that.yield!
 			@current-refresh = null
 		return @compiled
-	
+
 	refresh: async ->
 		try
 			@error = null
@@ -43,20 +53,13 @@ class exports.Template
 			# let load know we couldn't
 			return null
 
-	compile: (src)->
-		# compile & cache it
-		@compiled = handlebars.compile src
-
-	render: async (data)->
-		if @error? # the last refresh didn't go so well
-			throw that
-		else if @load()?
+	output: async (data)->
+		if @load()?
 			# we have a cached template
-			blob = (require "./data" .Data.resolve @unext)?.render! ? {} # any data blobs for us?
-			that blob import data
+			@render that,data
 		else
-			# if we're here something's rotten but you never know
-			throw new Error "an unknown error occured"
+			# if we're here and error's null something's rotten but you never know
+			throw @error ? new Error "an unknown error occured"
 
 	(@path)->
 		@unext = path - //#{extname path}$//
@@ -64,7 +67,5 @@ class exports.Template
 		
 		# load this template IN THE FUTURE!
 		do future @~refresh
-		
-handlebars.register-helper \extends (parent,options)->
-	# render a parent template with the child template as the {{{body}}}
-	Template.files[parent.replace '.' '/'].render {} import this import body:options.fn this
+
+require-folder \handlers
