@@ -71,10 +71,10 @@ module.exports = class Awscms
 					ex = if @external? then that req,res else {} # any external data?
 					GlobalData.collapse!
 					|> (import ex)
-					|> file.render
+					|> file.output
 					|> res.send
 					return true # notify sync's callback that we were able to render (avoids sending headers twice)
-					
+
 		:callback (err,res)->
 			# pass on to the next handle iff we haven't rendered a template. pass any serious errors on
 			next err unless res

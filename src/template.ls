@@ -11,21 +11,21 @@ class exports.Template
 	@files = []
 	@init-s3 = (s3 :=)
 	@handles = (in [\.htm \.html]) . extname
-	
+
 	@resolve = (path)->
 		@files[path] ? @files[if path then "#path/index" else \index]
-		
+
 	last-etag: null
 	compiled: null
 	current-refresh: null
-	
+
 	load: async ->
 		# if there is an S3 GET currently in progress, block on it
 		if @current-refresh?
 			that.yield!
 			@current-refresh = null
 		return @compiled
-	
+
 	refresh: async ->
 		try
 			@error = null
@@ -47,16 +47,20 @@ class exports.Template
 		# compile & cache it
 		@compiled = handlebars.compile src
 
-	render: async (data)->
-		if @error? # the last refresh didn't go so well
-			throw that
-		else if @load()?
+	render: (template,data)->
+		# any data blobs for us?
+		blob = (require "./data" .Data.resolve @unext)?.output! ? {}
+		if template not instanceof Function
+			console.log [\RSNT template]
+		template ^^blob import data
+
+	output: async (data)->
+		if @load()?
 			# we have a cached template
-			blob = (require "./data" .Data.resolve @unext)?.render! ? {} # any data blobs for us?
-			that blob import data
+			@render that,data
 		else
-			# if we're here something's rotten but you never know
-			throw new Error "an unknown error occured"
+			# if we're here and error's null something's rotten but you never know
+			throw @error ? new Error "an unknown error occured"
 
 	(@path)->
 		@unext = path - //#{extname path}$//
@@ -64,7 +68,7 @@ class exports.Template
 		
 		# load this template IN THE FUTURE!
 		do future @~refresh
-		
+
 handlebars.register-helper \extends (parent,options)->
 	# render a parent template with the child template as the {{{body}}}
-	Template.files[parent.replace '.' '/'].render {} import this import body:options.fn this
+	Template.files[parent.replace '.' '/'].output {} import this import body:options.fn this
