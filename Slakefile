@@ -7,6 +7,7 @@ fs = require \fs
 
 shell = (line)->
 	[cmd,...args] = words line
+
 	(out ? id)->
 		console.log line
 		spawn cmd,args,stdio:\inherit .on \close out
@@ -75,7 +76,7 @@ munge-package = (fn)-> munge-file \package.json JSON.parse>>fn>>(JSON.stringify 
 
 munge-version = (fn)->
 	munge-package (import version: format-version fn parse-version it.version)
-	<- (shell "git commit -am 'bump version'")
+	<- (shell "git commit -am bump")
 
 task \bump-release ->munge-version (import release: it.release + 1)
 task \bump-minor   ->munge-version (import minor:   it.minor   + 1, release: 0)
