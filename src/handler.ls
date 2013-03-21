@@ -16,6 +16,8 @@ class exports.Handler implements abstract \compile \render
 	@init-s3 = (s3 :=)
 
 	@resolve = (path)->
+		path -= /\/$/
+
 		@files[path] ? @files[if path then "#path/index" else \index]
 
 	@roles = {}
