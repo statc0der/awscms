@@ -74,10 +74,8 @@ munge-file = (file,fn)-->
 munge-package = (fn)-> munge-file \package.json JSON.parse>>fn>>(JSON.stringify _,null,2)
 
 munge-version = (fn)->
-	new-version = format-version fn parse-version it.version
-	munge-package (import version: new-version)
-	<- (shell "git commit -am #new-version")
-	<- (shell "git tag #new-version")
+	munge-package (import version: format-version fn parse-version it.version)
+	<- (shell "git commit -am 'bump version'")
 
 task \bump-release ->munge-version (import release: it.release + 1)
 task \bump-minor   ->munge-version (import minor:   it.minor   + 1, release: 0)
