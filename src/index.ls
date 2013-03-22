@@ -13,16 +13,8 @@ require! {
 tap = (fn,a)--> fn a; a
 and-now = tap (do)
 module.exports = class Awscms
-	var s3
-	@init-s3 = (new-s3)->
-		# Template needs to access our S3
-		s3 := new-s3
-		Handler.init-s3 new-s3
-
 	({ # Awscms' constructor
-		access-key-id
-		secret-access-key
-		bucket
+		backend
 		@prefix
 		@external
 		proxy
@@ -31,8 +23,7 @@ module.exports = class Awscms
 	})->
 		if proxy? then http-options import agent:tunnel.https-over-http {proxy}
 
-		@@init-s3 aws2js.load \s3 access-key-id, secret-access-key,null,http-options
-		s3.set-bucket bucket
+		Backend.create backend.name, backend.options[backend.name]
 
 		Sync do
 			:fiber !~>
@@ -48,7 +39,7 @@ module.exports = class Awscms
 
 	load-templates: async ->
 		# GET the bucket root for a list of all its files
-		for {Key} in [] ++ ((sync s3~get) '/' \xml .Contents)
+		for file in Backend.current.list!
 			# instantiate a handler for each file in the bucket if we can
 			if handler = find (.handles Key), Handler.subclasses
 				if (file = handler.files[Key - //#{extname Key}$//])?

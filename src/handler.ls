@@ -12,9 +12,6 @@ require! {
 class exports.Handler implements abstract \compile \render
 	import abstract \handles
 
-	var s3 # private static
-	@init-s3 = (s3 :=)
-
 	@resolve = (path)->
 		path -= /\/$/
 		@files[path] ? @files[if path then "#path/index" else \index]
@@ -30,7 +27,7 @@ class exports.Handler implements abstract \compile \render
 	current-refresh: null
 
 	load: async ->
-		# if there is an S3 GET currently in progress, block on it
+		# if there is a refresh currently in progress, block on it
 		if @current-refresh?
 			that.yield!
 			@current-refresh = null
@@ -39,15 +36,10 @@ class exports.Handler implements abstract \compile \render
 	refresh: async ->
 		try
 			@error = null
-			# all we need is the etag
-			headers = (sync s3~head) @path
-
-			if headers.etag isnt @last-etag
-				# it's fresh on s3
-				@last-etag = headers.etag
-				
-				{buffer} = (sync s3~get) @path,\buffer
-				@compile buffer.to-string \utf8
+			if Backend.current.is-fresh @path @last-etag
+				{content,etag} = Backend.current.get @path
+				@last-etag = etag
+				@compile content
 
 		catch @error
 			# let load know we couldn't
