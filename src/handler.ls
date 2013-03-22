@@ -5,6 +5,8 @@ require! {
 	"./magic".async
 	"./magic".future
 	"./oop".abstract
+	"./oop".subclass-tracker
+
 }
 
 class exports.Handler implements abstract \compile \render
@@ -15,15 +17,13 @@ class exports.Handler implements abstract \compile \render
 
 	@resolve = (path)->
 		path -= /\/$/
-
 		@files[path] ? @files[if path then "#path/index" else \index]
 
 	@roles = {}
 	@provides = (role)->
 		@roles[role] = this
 
-	@subclasses = []
-	@extended = @subclasses~push
+	import subclass-tracker!
 
 	last-etag: null
 	compiled: null
