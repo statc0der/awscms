@@ -53,7 +53,7 @@ task \run ->
 		refresh-interval: 5s * 1000ms
 		external: -> test:"hello"
 		backend:
-			name: \Filesystem
+			name: \Amazon
 			options:
 				Amazon: JSON.parse fs.read-file-sync 'config.json' \utf8
 				Filesystem: directory: "../test/path"
