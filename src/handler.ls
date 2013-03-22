@@ -4,10 +4,8 @@ require! {
 	"./magic".sync
 	"./magic".async
 	"./magic".future
+	"./oop".abstract
 }
-
-abstract = (...methods)->
-	{[m,->throw new TypeError "#m is abstract"] for m in methods}
 
 class exports.Handler implements abstract \compile \render
 	import abstract \handles
