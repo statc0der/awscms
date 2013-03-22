@@ -51,9 +51,10 @@ task \run ->
 	app.use ...Awscms.middleware {
 		prefix: '/'
 		refresh-interval: 5s * 1000ms
-		proxy: host: \localhost port:3128
 		external: -> test:"hello"
-		...(JSON.parse fs.read-file-sync 'config.json' \utf8)
+		backend:
+			name: \amazon
+			options: amazon: JSON.parse fs.read-file-sync 'config.json' \utf8
 	}
 	app.use (q,s,n)->s.send "404"
 
