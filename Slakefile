@@ -53,8 +53,8 @@ task \run ->
 		refresh-interval: 5s * 1000ms
 		external: -> test:"hello"
 		backend:
-			name: \amazon
-			options: amazon: JSON.parse fs.read-file-sync 'config.json' \utf8
+			name: \Amazon
+			options: Amazon: JSON.parse fs.read-file-sync 'config.json' \utf8
 	}
 	app.use (q,s,n)->s.send "404"
 

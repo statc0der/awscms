@@ -1,12 +1,11 @@
 require! {
-	aws2js
-	tunnel
 	Sync:sync
 	path.extname
 	"./magic".sync
 	"./magic".async
 	"./magic".future
 	"./handler".Handler
+	"./backend".Backend
 	"prelude-ls".find
 }
 
@@ -17,12 +16,8 @@ module.exports = class Awscms
 		backend
 		@prefix
 		@external
-		proxy
-		http-options ? {}
 		refresh-interval ? 1000ms * 60s * 5m
 	})->
-		if proxy? then http-options import agent:tunnel.https-over-http {proxy}
-
 		Backend.create backend.name, backend.options[backend.name]
 
 		Sync do
@@ -39,13 +34,13 @@ module.exports = class Awscms
 
 	load-templates: async ->
 		# GET the bucket root for a list of all its files
-		for file in Backend.current.list!
+		for filename in Backend.current.list!
 			# instantiate a handler for each file in the bucket if we can
-			if handler = find (.handles Key), Handler.subclasses
-				if (file = handler.files[Key - //#{extname Key}$//])?
+			if handler = find (.handles filename), Handler.subclasses
+				if (file = handler.files[filename - //#{extname filename}$//])?
 					file.current-refresh = do (future file~refresh) unless file.current-refresh?
-				else new handler Key
-			else console.warn "No handler for #Key"
+				else new handler filename
+			else console.warn "No handler for #filename"
 
 	middleware: (req,res,next)-> Sync do
 		:fiber ~>

@@ -6,7 +6,7 @@ require! {
 	"./magic".future
 	"./oop".abstract
 	"./oop".subclass-tracker
-
+	"./backend".Backend
 }
 
 class exports.Handler implements abstract \compile \render
@@ -36,7 +36,7 @@ class exports.Handler implements abstract \compile \render
 	refresh: async ->
 		try
 			@error = null
-			if Backend.current.is-fresh @path @last-etag
+			if Backend.current.is-fresh @path, @last-etag
 				{content,etag} = Backend.current.get @path
 				@last-etag = etag
 				@compile content

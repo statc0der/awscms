@@ -1,8 +1,8 @@
 require! {
-	\aws2js
-	"./magic".sync
-	"./magic".async
-	"./magic".future
+	aws2js
+	tunnel
+	"../magic".sync
+	"../magic".async
 	"../backend".Backend
 }
 
@@ -17,10 +17,13 @@ class exports.Amazon extends Backend
 		tag isnt headers.etag
 
 	list: async ->
-		(sync s3~get) '/' \xml .Contents
+		(sync @s3~get) '/' \xml .Contents
 		|> ([] ++) # when there is only one thing in the bucket S3 returns a bare object. we want an array.
 		|> map (.Key) # just the filenames
+		|> -> console.log it; it
 
-	({access-key-id,secret-access-key,bucket})->
+	({access-key-id,secret-access-key,bucket,proxy,http-options ? {}})->
+		if proxy? then http-options import agent:tunnel.https-over-http {proxy}
+
 		@s3 = aws2js.load \s3 access-key-id, secret-access-key,null,http-options
 		@s3.set-bucket bucket
