@@ -20,7 +20,6 @@ class exports.Amazon extends Backend
 		(sync @s3~get) '/' \xml .Contents
 		|> ([] ++) # when there is only one thing in the bucket S3 returns a bare object. we want an array.
 		|> map (.Key) # just the filenames
-		|> -> console.log it; it
 
 	({access-key-id,secret-access-key,bucket,proxy,http-options ? {}})->
 		if proxy? then http-options import agent:tunnel.https-over-http {proxy}
