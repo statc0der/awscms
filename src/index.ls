@@ -26,7 +26,7 @@ module.exports = class Awscms
 					@load-templates!
 					Sync.sleep refresh-interval
 			:handler ->
-				console.error it
+				console.error it.stack
 				throw it if it.errno?
 
 	refresh: async ->
